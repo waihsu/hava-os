@@ -3,7 +3,7 @@ resolver = "3"
 members = ["kernel"]
 
 [package]
-name = "nova-os"
+name = "hava-os"
 version = "0.1.0"
 edition = "2024"
 

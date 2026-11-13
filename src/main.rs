@@ -4,6 +4,7 @@ use std::process::Command;
 
 fn main() {
     let image = env!("BIOS_IMAGE");
+    let hold_screen = env::args().any(|arg| arg == "--hold");
     let qemu = env::var_os("QEMU_SYSTEM_X86_64").map(PathBuf::from).unwrap_or_else(|| {
         let default_path = PathBuf::from(r"C:\Program Files\qemu\qemu-system-x86_64.exe");
         if default_path.exists() {
@@ -13,10 +14,16 @@ fn main() {
         }
     });
 
-    let status = Command::new(qemu)
+    let mut command = Command::new(qemu);
+    command
         .args(["-drive", &format!("format=raw,file={image}")])
-        .args(["-serial", "stdio", "-display", "none"])
-        .args(["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"])
+        .args(["-serial", "stdio"]);
+
+    if !hold_screen {
+        command.args(["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]);
+    }
+
+    let status = command
         .status()
         .expect("failed to start QEMU; install QEMU and ensure it is on PATH");
 
